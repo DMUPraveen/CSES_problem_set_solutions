@@ -9,38 +9,62 @@ const ll M = 1'000'000'007;
 const ll MAX_PRICE = 100000 + 5;
 const ll MAX_BOOKS = 1000 + 5;
 
-ll dp[MAX_PRICE] = {-1};
-ll prices[MAX_BOOKS] = {0};
-ll pages[MAX_BOOKS] = {0};
+const ll MAX_VALUE = 100 + 5;
+const ll MAX_SIZE = 100'000 + 5;
 
+ll dp[MAX_SIZE][MAX_VALUE] = {0};
 int main()
 {
-    ll N;
-    ll x;
-    // vecl dp = vecl(MAX_BOOKS, -1);
-    cin >> N >> x;
-    dp[0] = 0;
-    for (ll b = 0; b < N; b++)
+    ll n, m;
+    cin >> n >> m;
+    ll v = 0;
+    cin >> v;
+    if (v == 0)
     {
-        cin >> prices[b];
-    }
-    for (ll b = 0; b < N; b++)
-    {
-        cin >> pages[b];
-    }
-    for (ll b = 0; b < N; b++)
-    {
-        for (ll i = x; i >= 0; i--)
+        for (ll x = 1; x <= m; x++)
         {
-            ll page = pages[b];
-            ll price = prices[b];
-            ll pre_price = i - price;
-            if (pre_price < 0)
-                continue;
-            if (dp[pre_price] == -1)
-                continue;
-            dp[i] = max(dp[i], dp[pre_price] + page);
+            dp[0][x] = 1;
         }
     }
-    cout << *max_element(dp, dp + x + 1) << endl;
+    else
+    {
+        dp[0][v] = 1;
+    }
+    for (ll i = 1; i < n; i++)
+    {
+        cin >> v;
+        if (v != 0)
+        {
+            if (v - 1 > 0)
+            {
+                dp[i][v] = (dp[i][v] + dp[i - 1][v - 1]) % M;
+            }
+            if (v + 1 <= m)
+            {
+                dp[i][v] = (dp[i][v] + dp[i - 1][v + 1]) % M;
+            }
+            dp[i][v] = (dp[i][v] + dp[i - 1][v]) % M;
+        }
+        else
+        {
+            for (ll x = 1; x <= m; x++)
+            {
+                if (x - 1 > 0)
+                {
+                    dp[i][x] = (dp[i][x] + dp[i - 1][x - 1]) % M;
+                }
+                if (x + 1 <= m)
+                {
+                    dp[i][x] = (dp[i][x] + dp[i - 1][x + 1]) % M;
+                }
+                dp[i][x] = (dp[i][x] + dp[i - 1][x]) % M;
+            }
+        }
+    }
+    ll sum = 0;
+    for (ll v = 1; v <= m; v++)
+    {
+        sum = (sum + dp[n - 1][v]) % M;
+    }
+    cout << sum << endl;
 }

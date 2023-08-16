@@ -4,52 +4,85 @@ using ll = int64_t;
 using vecl = vector<ll>;
 using pll = pair<ll, ll>;
 using vecpl = vector<pll>;
+using mapl = unordered_map<ll, vecl>;
 
-void solve(vector<vecl>& tre){
-    auto s = stack<ll>();
-    ll top = 0;
-    s.push(0);
-    vecl vt = vecl(tre.size(),0);
-    vecl gd= vecl(tre.size(),0);
-    vt[0] = 1;
-    ll count = 0;
-    while(!s.empty()){
-        ll r = s.top();
-        bool finished = true;
-        for(auto x: tre[r]){
-            if(!vt[x]){
-                if(gd[r]!=1){
-                    count ++;
-                    gd[r] = 1;
-                    gd[x] = 1;
-
-                }
-                vt[x]=1;
-                finished = false;
-                s.push(x);
-            }
-        }
-        if(finished){
-            s.pop();
-        }
-
+void dfs(mapl &t, int s, vecl &stack, vecl &v)
+{
+    if (v[s])
+    {
+        return;
     }
-    cout << count << endl;
+    v[s] = 1;
+    for (auto x : t[s])
+    {
+        dfs(t, x, stack, v);
+    }
+    stack.push_back(s);
+}
+void dbgp(vecl &v)
+{
+    for (auto x : v)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+}
+int solution(mapl &t, vecl ds, int n)
+{
+    vecl dpused = vecl(n, 0);
+    vecl dpfree = vecl(n, 0);
+    vecl v = vecl(n, 0);
+    ll ans = 0;
+    for (auto x : ds)
+    {
+        for (auto y : t[x])
+        {
+            if (not v[y])
+            {
+                continue;
+            }
+            dpfree[x] += dpused[y];
+        }
+        for (auto y : t[x])
+        {
+            if (not v[y])
+            {
+                continue;
+            }
+            dpused[x] = max(dpused[x], dpfree[x] - dpused[y] + dpfree[y] + 1);
+        }
+        v[x] = 1;
+        ans = max(dpused[x], dpfree[x]);
+    }
+    return ans;
+}
+int solve(mapl &t, int n)
+{
+
+    vecl v = vecl(n, 0);
+    vecl s = vecl();
+    dfs(t, 0, s, v);
+    // dbgp(v);
+    // dbgp(s);
+    return solution(t, s, n);
 }
 
 int main()
 {
     ll N;
     cin >> N;
-    vector<vecl> c = vector<vecl>(N);
-    ll a,b;
-    
-    for(int i=0;i<N-1;i++){
+    ll a, b;
+    mapl t;
+
+    for (int i = 0; i < N - 1; i++)
+    {
         cin >> a >> b;
-        c[a-1].push_back(b-1);
-        c[b-1].push_back(a-1);
+        a--;
+        b--;
+        t[a].push_back(b);
+        t[b].push_back(a);
     }
-    solve(c);
+    cout << solve(t, N) << endl;
 
     return 0;
 }
